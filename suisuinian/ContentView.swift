@@ -12,61 +12,58 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        entity: Birthday.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Birthday.date, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var birthdays: FetchedResults<Birthday>
+
+    @State private var showingAdd = false
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                ForEach(birthdays) { birthday in
+                    NavigationLink(destination: BirthdayDetailView(birthday: birthday)) {
+                        VStack(alignment: .leading) {
+                            Text(birthday.name ?? "无名")
+                                .font(.headline)
+                            HStack {
+                                if birthday.isLunar {
+                                    Text("农历：" + (birthday.lunarDateString ?? "-"))
+                                    Text("(公历：" + (birthday.solarDateString ?? "-") + ")")
+                                } else {
+                                    Text("公历：" + (birthday.solarDateString ?? "-"))
+                                    Text("(农历：" + (birthday.lunarDateString ?? "-") + ")")
+                                }
+                            }.font(.subheadline)
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
+                .onDelete(perform: deleteBirthdays)
             }
+            .navigationTitle("生日列表")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingAdd = true }) {
+                        Label("添加生日", systemImage: "plus")
                     }
                 }
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            .sheet(isPresented: $showingAdd) {
+                AddBirthdayView().environment(\.managedObjectContext, viewContext)
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteBirthdays(offsets: IndexSet) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
+            offsets.map { birthdays[$0] }.forEach(viewContext.delete)
             do {
                 try viewContext.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
@@ -74,10 +71,9 @@ struct ContentView: View {
     }
 }
 
-private let itemFormatter: DateFormatter = {
+private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
+    formatter.dateStyle = .long
     return formatter
 }()
 

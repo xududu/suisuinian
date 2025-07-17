@@ -15,8 +15,12 @@ struct PersistenceController {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            let newBirthday = Birthday(context: viewContext)
+            newBirthday.name = "测试"
+            newBirthday.date = Date()
+            newBirthday.isLunar = false
+            newBirthday.relation = "朋友"
+            newBirthday.note = "示例数据"
         }
         do {
             try viewContext.save()

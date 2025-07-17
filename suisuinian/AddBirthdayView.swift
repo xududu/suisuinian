@@ -12,15 +12,36 @@ struct AddBirthdayView: View {
     @State private var isLunar = false
     @State private var relation = ""
     @State private var note = ""
+    @State private var lunarYear = 1990
+    @State private var lunarMonth = 1
+    @State private var lunarDay = 1
 
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("基本信息")) {
                     TextField("姓名", text: $name)
-                    DatePicker("生日", selection: $date, displayedComponents: .date)
-                        .environment(\.locale, Locale(identifier: "zh_CN"))
                     Toggle("农历生日", isOn: $isLunar)
+                    if isLunar {
+                        Picker("年份", selection: $lunarYear) {
+                            ForEach(1900...2100, id: \.self) { year in
+                                Text("\(year)年")
+                            }
+                        }
+                        Picker("月份", selection: $lunarMonth) {
+                            ForEach(1...12, id: \.self) { month in
+                                Text("\(month)月")
+                            }
+                        }
+                        Picker("日期", selection: $lunarDay) {
+                            ForEach(1...30, id: \.self) { day in
+                                Text("\(day)日")
+                            }
+                        }
+                    } else {
+                        DatePicker("生日", selection: $date, displayedComponents: .date)
+                            .environment(\.locale, Locale(identifier: "zh_CN"))
+                    }
                     TextField("关系(如家人/朋友)", text: $relation)
                 }
                 Section(header: Text("备注")) {
@@ -44,18 +65,14 @@ struct AddBirthdayView: View {
     private func addBirthday() {
         let newBirthday = Birthday(context: viewContext)
         newBirthday.name = name
-        newBirthday.date = date
         newBirthday.isLunar = isLunar
         newBirthday.relation = relation
         newBirthday.note = note
-        // 使用 lunar-swift 进行历法转换
         if isLunar {
-            let chineseCalendar = Calendar(identifier: .chinese)
-            let lunarComponents = chineseCalendar.dateComponents([.year, .month, .day], from: date)
             let lunar = Lunar.fromYmdHms(
-                lunarYear: lunarComponents.year!,
-                lunarMonth: lunarComponents.month!,
-                lunarDay: lunarComponents.day!,
+                lunarYear: lunarYear,
+                lunarMonth: lunarMonth,
+                lunarDay: lunarDay,
                 hour: 0,
                 minute: 0,
                 second: 0
@@ -63,6 +80,9 @@ struct AddBirthdayView: View {
             let solar = lunar.solar
             newBirthday.lunarDateString = lunar.description
             newBirthday.solarDateString = solar.fullString
+            // 手动组装 Date
+            let components = DateComponents(year: solar.year, month: solar.month, day: solar.day)
+            newBirthday.date = Calendar(identifier: .gregorian).date(from: components)
         } else {
             let calendar = Calendar(identifier: .gregorian)
             let components = calendar.dateComponents([.year, .month, .day], from: date)
@@ -77,6 +97,7 @@ struct AddBirthdayView: View {
             let lunar = solar.lunar
             newBirthday.solarDateString = solar.fullString
             newBirthday.lunarDateString = lunar.description
+            newBirthday.date = date
         }
         do {
             try viewContext.save()

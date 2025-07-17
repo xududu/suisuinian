@@ -10,7 +10,12 @@ struct BirthdayDetailView: View {
                 Text(birthday.name ?? "无名")
             }
             Section(header: Text("生日")) {
-                Text(birthday.date != nil ? dateFormatter.string(from: birthday.date!) : "无日期")
+                if let date = birthday.date {
+                    Text(dateFormatter.string(from: date))
+                    Text(timeFormatter.string(from: date))
+                } else {
+                    Text("无日期")
+                }
                 Text(birthday.isLunar ? "农历" : "公历")
             }
             if let relation = birthday.relation, !relation.isEmpty {
@@ -31,5 +36,11 @@ struct BirthdayDetailView: View {
 private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateStyle = .long
+    return formatter
+}()
+
+private let timeFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm"
     return formatter
 }()

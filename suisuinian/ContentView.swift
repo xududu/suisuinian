@@ -43,17 +43,17 @@ struct ContentView: View {
                             HStack(spacing: 12) {
                                 if birthday.isLunar {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("农历：" + (birthday.lunarDateString ?? "-"))
+                                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
                                             .font(.body)
-                                        Text("公历：" + (birthday.solarDateString ?? "-"))
+                                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
                                             .font(.footnote)
                                             .foregroundColor(.secondary)
                                     }
                                 } else {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("公历：" + (birthday.solarDateString ?? "-"))
+                                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
                                             .font(.body)
-                                        Text("农历：" + (birthday.lunarDateString ?? "-"))
+                                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
                                             .font(.footnote)
                                             .foregroundColor(.secondary)
                                     }

@@ -17,6 +17,7 @@ struct AddBirthdayView: View {
                 Section(header: Text("基本信息")) {
                     TextField("姓名", text: $name)
                     DatePicker("生日", selection: $date, displayedComponents: .date)
+                        .environment(\.locale, Locale(identifier: "zh_CN"))
                     Toggle("农历生日", isOn: $isLunar)
                     TextField("关系(如家人/朋友)", text: $relation)
                 }
@@ -61,18 +62,20 @@ struct AddBirthdayView: View {
         }
     }
 
-    // 公历字符串
+    // 公历字符串（中文月份）
     private func solarString(from date: Date) -> String {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
         formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.dateStyle = .long
+        formatter.dateFormat = "yyyy年M月d日" // 显示为中文格式
         return formatter.string(from: date)
     }
-    // 农历字符串（简单实现，真实项目建议用第三方库如SwiftLunar）
+    // 农历字符串（中文月份）
     private func lunarString(from date: Date) -> String {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
         formatter.calendar = Calendar(identifier: .chinese)
-        formatter.dateStyle = .long
+        formatter.dateFormat = "yyyy年M月d日" // 显示为中文格式
         return formatter.string(from: date)
     }
 }

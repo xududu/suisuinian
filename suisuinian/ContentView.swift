@@ -59,6 +59,16 @@ struct ContentView: View {
                                     }
                                 }
                             }
+                            if let (days, age) = daysAndAgeToNextBirthday(birthday: birthday) {
+                                Text("\(days)天后\(age)岁生日")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(Color.accentColor)
+                                    .cornerRadius(10)
+                                    .padding(.top, 2)
+                            }
                             if let note = birthday.note, !note.isEmpty {
                                 Text("备注：" + note)
                                     .font(.footnote)
@@ -104,6 +114,36 @@ struct ContentView: View {
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }
         }
+    }
+
+    // 返回距离下一个生日多少天，以及下一个生日的年龄
+    func daysAndAgeToNextBirthday(birthday: Birthday) -> (Int, Int)? {
+        guard let date = birthday.date else { return nil }
+        let calendar = Calendar(identifier: .gregorian)
+        let now = Date()
+        let nowComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        let birthComponents = calendar.dateComponents([.year, .month, .day], from: date)
+        var nextBirthdayComponents = DateComponents()
+        nextBirthdayComponents.year = nowComponents.year
+        nextBirthdayComponents.month = birthComponents.month
+        nextBirthdayComponents.day = birthComponents.day
+        var age = (nowComponents.year ?? 0) - (birthComponents.year ?? 0)
+        // 今年的生日
+        if let nextBirthday = calendar.date(from: nextBirthdayComponents) {
+            if nextBirthday >= now {
+                let days = calendar.dateComponents([.day], from: now, to: nextBirthday).day ?? 0
+                if days == 0 { age += 1 } // 今天生日，年龄+1
+                return (days, age + 1)
+            } else {
+                // 明年的生日
+                nextBirthdayComponents.year! += 1
+                if let nextBirthday = calendar.date(from: nextBirthdayComponents) {
+                    let days = calendar.dateComponents([.day], from: now, to: nextBirthday).day ?? 0
+                    return (days, age + 2)
+                }
+            }
+        }
+        return nil
     }
 }
 

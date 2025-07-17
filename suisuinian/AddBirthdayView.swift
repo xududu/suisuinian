@@ -1,5 +1,7 @@
 import SwiftUI
 import CoreData
+// 引入LunarSwift
+import LunarSwift
 
 struct AddBirthdayView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -46,13 +48,35 @@ struct AddBirthdayView: View {
         newBirthday.isLunar = isLunar
         newBirthday.relation = relation
         newBirthday.note = note
-        // 自动转换历法
+        // 使用 lunar-swift 进行历法转换
         if isLunar {
-            newBirthday.lunarDateString = lunarString(from: date)
-            newBirthday.solarDateString = solarString(from: date)
+            let chineseCalendar = Calendar(identifier: .chinese)
+            let lunarComponents = chineseCalendar.dateComponents([.year, .month, .day], from: date)
+            let lunar = Lunar.fromYmdHms(
+                lunarYear: lunarComponents.year!,
+                lunarMonth: lunarComponents.month!,
+                lunarDay: lunarComponents.day!,
+                hour: 0,
+                minute: 0,
+                second: 0
+            )
+            let solar = lunar.solar
+            newBirthday.lunarDateString = lunar.description
+            newBirthday.solarDateString = solar.fullString
         } else {
-            newBirthday.solarDateString = solarString(from: date)
-            newBirthday.lunarDateString = lunarString(from: date)
+            let calendar = Calendar(identifier: .gregorian)
+            let components = calendar.dateComponents([.year, .month, .day], from: date)
+            let solar = Solar.fromYmdHms(
+                year: components.year!,
+                month: components.month!,
+                day: components.day!,
+                hour: 0,
+                minute: 0,
+                second: 0
+            )
+            let lunar = solar.lunar
+            newBirthday.solarDateString = solar.fullString
+            newBirthday.lunarDateString = lunar.description
         }
         do {
             try viewContext.save()

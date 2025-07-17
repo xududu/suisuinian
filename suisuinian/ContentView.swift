@@ -24,23 +24,59 @@ struct ContentView: View {
             List {
                 ForEach(birthdays) { birthday in
                     NavigationLink(destination: BirthdayDetailView(birthday: birthday)) {
-                        VStack(alignment: .leading) {
-                            Text(birthday.name ?? "无名")
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                if birthday.isLunar {
-                                    Text("农历：" + (birthday.lunarDateString ?? "-"))
-                                    Text("(公历：" + (birthday.solarDateString ?? "-") + ")")
-                                } else {
-                                    Text("公历：" + (birthday.solarDateString ?? "-"))
-                                    Text("(农历：" + (birthday.lunarDateString ?? "-") + ")")
+                                Text(birthday.name ?? "无名")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                Spacer()
+                                if let relation = birthday.relation, !relation.isEmpty {
+                                    Text(relation)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
                                 }
-                            }.font(.subheadline)
+                            }
+                            HStack(spacing: 12) {
+                                if birthday.isLunar {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("农历：" + (birthday.lunarDateString ?? "-"))
+                                            .font(.body)
+                                        Text("公历：" + (birthday.solarDateString ?? "-"))
+                                            .font(.footnote)
+                                            .foregroundColor(.secondary)
+                                    }
+                                } else {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("公历：" + (birthday.solarDateString ?? "-"))
+                                            .font(.body)
+                                        Text("农历：" + (birthday.lunarDateString ?? "-"))
+                                            .font(.footnote)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            if let note = birthday.note, !note.isEmpty {
+                                Text("备注：" + note)
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 2)
+                            }
                         }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .cornerRadius(14)
+                        .shadow(color: Color(.black).opacity(0.04), radius: 2, x: 0, y: 1)
                     }
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: deleteBirthdays)
             }
+            .listStyle(.plain)
             .navigationTitle("生日列表")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

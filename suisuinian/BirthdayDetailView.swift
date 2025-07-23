@@ -3,6 +3,8 @@ import CoreData
 
 struct BirthdayDetailView: View {
     @ObservedObject var birthday: Birthday
+    @Environment(\.managedObjectContext) private var viewContext
+    @State private var showingEdit = false
 
     var body: some View {
         Form {
@@ -55,6 +57,15 @@ struct BirthdayDetailView: View {
             }
         }
         .navigationTitle("生日详情")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("编辑") { showingEdit = true }
+            }
+        }
+        .sheet(isPresented: $showingEdit) {
+            EditBirthdayView(birthday: birthday)
+                .environment(\.managedObjectContext, viewContext)
+        }
     }
 
     // 生肖

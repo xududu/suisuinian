@@ -23,66 +23,10 @@ struct ContentView: View {
         NavigationView {
             List {
                 ForEach(birthdays) { birthday in
+                    let daysAndAge = daysAndAgeToNextBirthday(birthday: birthday)
                     NavigationLink(destination: BirthdayDetailView(birthday: birthday)) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text(birthday.name ?? "无名")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                Spacer()
-                                if let relation = birthday.relation, !relation.isEmpty {
-                                    Text(relation)
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 2)
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(8)
-                                }
-                            }
-                            HStack(spacing: 12) {
-                                if birthday.isLunar {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
-                                            .font(.body)
-                                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
-                                            .font(.footnote)
-                                            .foregroundColor(.secondary)
-                                    }
-                                } else {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
-                                            .font(.body)
-                                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
-                                            .font(.footnote)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-                            if let (days, age) = daysAndAgeToNextBirthday(birthday: birthday) {
-                                Text("\(days)天后\(age)岁生日")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(10)
-                                    .padding(.top, 2)
-                            }
-                            if let note = birthday.note, !note.isEmpty {
-                                Text("备注：" + note)
-                                    .font(.footnote)
-                                    .foregroundColor(.gray)
-                                    .padding(.top, 2)
-                            }
-                        }
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .cornerRadius(14)
-                        .shadow(color: Color(.black).opacity(0.04), radius: 2, x: 0, y: 1)
+                        BirthdayRowView(birthday: birthday, daysAndAge: daysAndAge)
                     }
-                    .listRowSeparator(.hidden)
-                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: deleteBirthdays)
             }
@@ -144,6 +88,72 @@ struct ContentView: View {
             }
         }
         return nil
+    }
+}
+
+struct BirthdayRowView: View {
+    let birthday: Birthday
+    let daysAndAge: (Int, Int)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(birthday.name ?? "无名")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+                if let relation = birthday.relation, !relation.isEmpty {
+                    Text(relation)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                }
+            }
+            HStack(spacing: 12) {
+                if birthday.isLunar {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
+                            .font(.body)
+                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("公历：" + (birthday.solarDateString?.prefix(10) ?? "-"))
+                            .font(.body)
+                        Text("农历：" + (birthday.lunarDateString?.prefix(while: { $0 != " " }) ?? "-"))
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            if let (days, age) = daysAndAge {
+                Text("\(days)天后\(age)岁生日")
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color.accentColor)
+                    .cornerRadius(10)
+                    .padding(.top, 2)
+            }
+            if let note = birthday.note, !note.isEmpty {
+                Text("备注：" + note)
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .padding(.top, 2)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(14)
+        .shadow(color: Color(.black).opacity(0.04), radius: 2, x: 0, y: 1)
+        .listRowSeparator(.hidden)
+        .padding(.vertical, 4)
     }
 }
 
